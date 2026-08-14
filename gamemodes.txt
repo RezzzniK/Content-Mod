@@ -1,0 +1,4 @@
+[DustStrike]
+description = "Two-team PvP prototype"
+layers = duststrike
+preview = mp_preview.jpg

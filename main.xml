@@ -1,13 +1,24 @@
 <scene version="2.0.4" shadowVolume="200 50 200">
-	<environment template="sunset" skyboxtint="0.88 0.45 0.19"/>
-	<script file="main.lua"/>
-	<script file="sandbox.lua"/>
-	<voxbox name="floor" pos="-25.0 0.0 -25.0" size="500 1 500" color="0.39 0.36 0.36"/>
-	<voxbox name="wall_1" pos="-25.0 0.0 -25.0" size="1 50 500" material="wood" color="0.7 0.5 0.3"/>
-	<voxbox name="wall_2" pos="25.0 0.0 -25.0" size="1 50 500" material="wood" color="0.7 0.5 0.3"/>
-	<voxbox name="wall_3" pos="-25.0 0.0 25.0" rot="0 90 0" size="1 50 500" material="wood" color="0.7 0.5 0.3"/>
-	<voxbox name="wall_4" pos="-25.0 0.0 -25.0" rot="0 90 0" size="1 50 500" material="wood" color="0.7 0.5 0.3"/>
-	<location name="spawn_t " tags="t_spawn" pos="22.6 0.0 -22.6"/>
-	<location name="spawn_ct" tags="ct_spawn" pos="-15.2 5.0 19.5"/>
-</scene>
+	<group name="DustStrike map">
+		<environment template="sunset" skyboxtint="0.88 0.45 0.19"/>
 
+		<voxbox name="floor" pos="-25.0 0.0 -25.0" size="500 1 500" color="0.39 0.36 0.36"/>
+
+		<voxbox name="wall_1" pos="-25.0 0.0 -25.0" size="1 50 500" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox name="wall_2" pos="25.0 0.0 -25.0" size="1 50 500" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox name="wall_3" pos="-25.0 0.0 25.0" rot="0 90 0" size="1 50 500" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox name="wall_4" pos="-25.0 0.0 -25.0" rot="0 90 0" size="1 50 500" material="wood" color="0.7 0.5 0.3"/>
+
+		<location name="spawn_t" tags="t_spawn" pos="22.6 0.2 -22.6"/>
+		<location name="spawn_ct" tags="ct_spawn" pos="-15.2 0.2 19.5"/>
+	</group>
+
+	<group name="Default" layer="-duststrike">
+		<script file="main.lua"/>
+		<script file="sandbox.lua"/>
+	</group>
+
+	<group name="DustStrike game mode" layer="duststrike">
+		<script file="MOD/duststrike.lua"/>
+	</group>
+</scene>

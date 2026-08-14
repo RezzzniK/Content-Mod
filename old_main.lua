@@ -1,5 +1,6 @@
 #version 2 
 
+#include "script/common.lua"
 #include "common.lua"
 #include "game.lua"
 #include "script/toolutilities.lua"
@@ -17,8 +18,9 @@ function server.init()
 	local levelId = GetString("game.levelid")
 	shared.enableValuables = not string.find(levelId, "sandbox") and not string.find(levelId, "ch_")
 
-	shared.roundTime = 10
+	shared.roundTime = 120
 	shared.roundState = "playing"
+	shared.roundWinner = ""
 	shared.restartTime = 0
 
 	server.ctSpawn = FindLocation("ct_spawn", true)
@@ -178,6 +180,53 @@ function server.startRound()
 
 	DebugPrint("New round started")
 end
+function server.endRound(winner)
+	if shared.roundState ~= "playing" then
+		return
+	end
+
+	shared.roundState = "round_end"
+	shared.roundWinner = winner
+	shared.restartTime = 3
+
+	DebugPrint("Round winner: " .. winner)
+end
+
+function server.checkTeamWin()
+	local ctAlive = 0
+	local tAlive = 0
+	local ctPlayers = 0
+	local tPlayers = 0
+
+	for player in Players() do
+		local team = server.playerTeams[player]
+		local alive = GetPlayerHealth(player) > 0
+
+		if team == "ct" then
+			ctPlayers = ctPlayers + 1
+			if alive then
+				ctAlive = ctAlive + 1
+			else
+				DisablePlayerInput(player)
+			end
+		elseif team == "t" then
+			tPlayers = tPlayers + 1
+			if alive then
+				tAlive = tAlive + 1
+			else
+				DisablePlayerInput(player)
+			end
+		end
+	end
+	-- Победу проверяем, только если в обеих командах есть игроки
+	if ctPlayers > 0 and tPlayers > 0 then
+		if ctAlive == 0 then
+			server.endRound("t")
+		elseif tAlive == 0 then
+			server.endRound("ct")
+		end
+	end	
+end
 
 function server.tick(dt)
 	for p in Players() do
@@ -248,9 +297,9 @@ function server.tick(dt)
 		shared.roundTime = math.max(0, shared.roundTime - dt)
 
 		if shared.roundTime <= 0 then
-			shared.roundState = "round_end"
-			shared.restartTime = 3
-			DebugPrint("Round ended")
+			server.endRound("draw")
+		else
+			server.checkTeamWin()
 		end
 
 	elseif shared.roundState == "round_end" then
@@ -339,16 +388,24 @@ function client.draw()
 			UiColor(1.0, 0.65, 0.2)
 			UiText("TEAM: T")
 		end
-
-		if timeLeft <= 0 then
+		if shared.roundState == "round_end" then
 			UiTranslate(0, 40)
 			UiColor(1, 1, 1)
 
-			local restartTime = math.ceil(
-				shared.restartTime or 0
-			)
+			local result = "DRAW"
+			if shared.roundWinner == "ct" then
+				result = "CT WIN"
+			elseif shared.roundWinner == "t" then
+				result = "T WIN"
+			end
 
-			UiText("NEW ROUND IN " .. restartTime)
+			UiText(result)
+
+			UiTranslate(0, 40)
+			UiText(
+				"NEW ROUND IN " ..
+				math.ceil(shared.restartTime or 0)
+			)
 		end
 	UiPop()
 end
